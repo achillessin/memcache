@@ -8,8 +8,8 @@ export default class Server {
     options = options ? options : {};
     this.host = options.host ? options.host : config.host;
     this.port = options.port ? options.port : config.port;
-    this.maxKeySize = options.maxKeySize  ? options.maxKeySize : config.maxKeySize;
-    this.maxValueSize = options.maxValueSize ? options.maxValueSize : config.maxValueSize;
+    this.maxKeySize = options.maxKeySize  ? options.maxKeySize : config.permissibleMaxKeySize;
+    this.maxValueSize = options.maxValueSize ? options.maxValueSize : config.permissibleMaxValueSize;
     this.tcpServer = null;
     this.connections = [];
 
@@ -35,8 +35,7 @@ export default class Server {
       })
       .on('connection', (socket) => {
         console.info('Opened socket connection on :', socket.address(), 'for remote address: ', socket.remoteAddress);
-        let connection = new Connection();
-        connection.init(socket);
+        let connection = new Connection(socket, {maxKeySize: this.maxKeySize, maxValueSize: this.maxValueSize});
         connection.on('close', () => {
           let index = this.connections.indexOf(connection);
           if(index >= 0) {

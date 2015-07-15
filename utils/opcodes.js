@@ -29,9 +29,9 @@ function headerToBuffer(header) {
   headerBuf.writeUInt32BE(header.opaque || 0, 12);
   if (header.cas) {
     header.cas.copy(headerBuf, 16);
-  } //else { TODO: fix this
-    //headerBuf.fill('\0', 16);
-  //}
+  } else {
+    headerBuf.fill('\0', 16);
+  }
   return headerBuf;
 }
 
@@ -48,5 +48,19 @@ function getCommand(opcode) {
   return null;
 }
 
+//errors
+let errors = {
+  'NO_ERROR': {code: 0x000, message: 'No error'},
+  'KEY_NOT_FOUND': {code: 0x0001, message: 'Key not found'},
+  'KEY_EXISTS': {code: 0x0002, message: 'Key exists'},
+  'VALUE_TOO_LARGE': {code: 0x0003, message: 'Value too large'},
+  'INVALID_ARGUMENTS': {code: 0x0004, message: 'Invalid arguments'},
+  'ITEM_NOT_STORED': {code: 0x0005, message: 'Item not stored'},
+  'BUCKET_ANOTHER_SERVER': {code: 0x0007, message: 'The vbucket belongs to another server'},
+  'UNKNOWN_COMMAND': {code: 0x0081, message: 'Unknown command'},
+  'OUT_OF_MEMORY': {code: 0x0082, message: 'Out of memory'},
+  'INTERNAL_ERROR': {code: 0x0084, message: 'Internal error'}
+};
 
-export {bufferToHeader, headerToBuffer, getCommand};
+
+export {bufferToHeader, headerToBuffer, getCommand, errors};
