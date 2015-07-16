@@ -24,10 +24,19 @@ node ./memcache.js --port="11211" --host="127.0.0.1"
 # Testing:
  performed using memslap program from libmemcached.
  
+ 
  memslap --servers="127.0.0.1:11211" --flag --binary --verbose --concurrency=1 --test="set" --execute-number=10000 --flag
+ 
+ 
  -Set queries : 10K -Time: 16secs -Concurrency : 1
+ 
+ 
  -Set queries : 10K -Time: 33secs -Concurrency : 2 Twice as many queries in parallel. The memcache still hold up and time is almost double that of before.
+ 
+ 
  -Set queires: 1000 -Time: 86 secs -Concurrency: 50  50 Clients connecting and sending 1000 queries. Works without crashes although my CPU load is about 200% ( posssibly because the 50 threads are on the same machine as the server)
+ 
+
 
  The system is able to handle about 600 set messages/sec. To improve throughput we need more servers.
  It can handle only ~128 connections at a time on Max OSX. Its because the 'somax' setting on Mac is set to just 128. Increase that
@@ -36,6 +45,8 @@ node ./memcache.js --port="11211" --host="127.0.0.1"
  
  Not able to test 'Get' using memslap since this system doesnt account for opcode 12 (which memslap is using)
  Testing the Get using a simple get command in a loop.
+ 
+ 
  -Get queries: 10K -Time: ~5s -Concurrency : 2
  Get are also limited by number of connections.
  
