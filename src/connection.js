@@ -17,6 +17,7 @@ export default class Connection extends events.EventEmitter {
     this.maxValueSize = options.maxValueSize;
     this.tcpServer = null;
     this.connections = [];
+    this.totalRequests = 0;
 
     if (this.maxKeySize > config.permissibleMaxKeySize) {
       throw new Error('maxKeySize is larger than the permitted value of:', config.permissibleMaxKeySize);
@@ -30,7 +31,9 @@ export default class Connection extends events.EventEmitter {
       this.messageHandler(data);
     }).on('close', () => {
       this.emit('close');
-    });
+    }).on('error', (error) => {
+      console.log('Error in connection: ', error);
+    })
   }
 
   addToBuffer(newBuffer) {
@@ -52,6 +55,7 @@ export default class Connection extends events.EventEmitter {
     console.info('Handling request: ', request);
     let checkRequestStatus = this.checkRequest(request);
     if (checkRequestStatus) {
+      console.error('Error in request header:', checkRequestStatus);
       let error = checkRequestStatus.error;
       return this.makeResponseBuffer(request.header, null, error.message, null, error.code);
     }
@@ -61,7 +65,6 @@ export default class Connection extends events.EventEmitter {
     switch (command) {
       case 'Get':
         record = lruCache.get(request.key.toString());
-        //TODO: handle vBucket belongs to other server error
         if (record) {
           responseBuffer = this.makeResponseBuffer(request.header, null, record.value, record.extras.flags, errors.NO_ERROR.code);
         } else {
@@ -74,6 +77,7 @@ export default class Connection extends events.EventEmitter {
         responseBuffer = this.makeResponseBuffer(request.header, null, null, null, errors.NO_ERROR.code);
         break;
       default:
+        console.log('Unknown command request made.');
         responseBuffer = this.makeResponseBuffer(request.header, null, errors.UNKNOWN_COMMAND.message, null, errors.UNKNOWN_COMMAND.code);
     }
     return responseBuffer;
@@ -146,7 +150,8 @@ export default class Connection extends events.EventEmitter {
 
   sendResponse(response) {
     this.socket.write(response, () => {
-      console.log('Sent response.');
+      console.log('Sent response no:', this.totalRequests);
+      this.totalRequests++;
     });
   }
 }

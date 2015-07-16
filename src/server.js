@@ -37,7 +37,9 @@ export default class Server {
         console.info('Opened socket connection on :', socket.address(), 'for remote address: ', socket.remoteAddress);
         let connection = new Connection(socket, {maxKeySize: this.maxKeySize, maxValueSize: this.maxValueSize});
         connection.on('close', () => {
+          console.log('Closing connection..');
           let index = this.connections.indexOf(connection);
+          console.log('**** Total Connections:', this.connections.length);
           if(index >= 0) {
             this.connections.splice(index, 1);
           }
